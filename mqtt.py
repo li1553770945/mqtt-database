@@ -3,7 +3,7 @@ from paho.mqtt import client as mqtt_client
 import threading
 
 class MQTT:
-    def __init__(self,addr:str,port:int,username:str,password:str) -> None:
+    def __init__(self,addr:str,port:int,username:str,password:str,logger) -> None:
         self.addr = addr
         self.port = port
         self.username = username
@@ -11,14 +11,13 @@ class MQTT:
         self.client_id = f'python-mqtt-{random.randint(0, 1000)}'
         self.client = mqtt_client.Client(self.client_id)
         self.subscribe_list = list()
+        self.logger = logger
     
     def connect(self,on_message):
         semaphore = threading.Semaphore(0)
-        print("test")
         def on_connect(client, userdata, flags, rc):
-            print(rc)
             if rc == 0:
-                print("Connected to MQTT Broker!")
+                self.logger.info("Connected to MQTT Broker!")
             else:
                 raise AssertionError(f"Failed to connect, return code {rc}\n")
             semaphore.release()
@@ -37,6 +36,12 @@ class MQTT:
     def subscribe(self,topic):
         self.client.subscribe(topic)
         self.subscribe_list.append(topic)
+    
+    def disconnect(self):
+        self.client.disconnect()  # 发送断开连接的命令
+        self.client.loop_stop()   # 停止网络循环
+        self.client.loop_stop(True)  # 等待网络循环真正停止
+
     
   
         
