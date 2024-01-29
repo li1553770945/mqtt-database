@@ -1,1 +1,6 @@
 *.pyc
+config.json
+config.yaml
+venv
+*.log
+*.xlsx
