@@ -23,6 +23,7 @@ class Device(Base):
     id = Column(Integer, primary_key=True)
     create_time = Column(DateTime, default=func.now()) 
     name = Column(String(255))
+    function = Column(String(255))
     equipment_id = Column(Integer, ForeignKey('tb_equipment.id'))
     project_id = Column(Integer,default=2)
     equipment = relationship("Equipment", back_populates="devices")
