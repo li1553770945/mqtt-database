@@ -1,5 +1,6 @@
 from settings import Config
 from database import Database
+from logger import setup_logging
 if __name__ == "__main__":
     config = Config("config.yaml")
     mqtt_config = config.mqtt
@@ -10,7 +11,7 @@ if __name__ == "__main__":
     password = mqtt_config.password
 
     db_uri = f'mysql+pymysql://{database_config.username}:{database_config.password}@{database_config.addr}:{database_config.port}/{database_config.dbname}'
-    database = Database(db_uri)
+    database = Database(db_uri,setup_logging())
 
     with open("eq.csv","r") as f:
         lines = f.readlines()

@@ -15,7 +15,7 @@ def main():
     password = mqtt_config.password
 
     db_uri = f'mysql+pymysql://{database_config.username}:{database_config.password}@{database_config.addr}:{database_config.port}/{database_config.dbname}'
-    database = Database(db_uri)
+    database = Database(db_uri,logger)
     handler = MessageHandler(database,logger)
 
     while True:
@@ -24,13 +24,17 @@ def main():
         mqtt.subscribe("data/#")
         while True:
             time.sleep(mqtt_config.watchdog_timeout/2)
-            if time.time() - last_update_time > mqtt_config.watchdog_timeout:
+            if time.time() - handler.last_update_time > mqtt_config.watchdog_timeout:
                 logger.warning("watch dog timeout! restart!")
                 mqtt.disconnect()
-                last_update_time = time.time()
+                handler.last_update_time = time.time()
                 break
         
 
 
 if __name__ == "__main__":
-    main()
+    while True:
+        try:
+            main()
+        except Exception:
+            print("System Error! Restart System!")
