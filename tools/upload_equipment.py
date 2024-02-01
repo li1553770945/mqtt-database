@@ -16,7 +16,7 @@ if __name__ == "__main__":
     db_uri = f'mysql+pymysql://{database_config.username}:{database_config.password}@{database_config.addr}:{database_config.port}/{database_config.dbname}'
     database = Database(db_uri,setup_logging())
 
-    with open("tools/eq.csv","r") as f:
+    with open("tools/equipment.csv","r") as f:
         lines = f.readlines()
         for line in lines:
             project_id,collector_id,meter_id,name = line.replace("\n","").split(",")
