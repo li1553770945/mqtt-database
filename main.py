@@ -15,7 +15,7 @@ def main():
     password = mqtt_config.password
 
     db_uri = f'mysql+pymysql://{database_config.username}:{database_config.password}@{database_config.addr}:{database_config.port}/{database_config.dbname}'
-    database = Database(db_uri,logger)
+    database = Database(config,db_uri,logger)
     handler = MessageHandler(database,logger)
 
     while True:
@@ -36,5 +36,5 @@ if __name__ == "__main__":
     while True:
         try:
             main()
-        except Exception:
-            print("System Error! Restart System!")
+        except Exception as err:
+            print("System Error! Restart System!",err)

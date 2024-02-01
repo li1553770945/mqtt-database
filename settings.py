@@ -7,6 +7,7 @@ class MQTTConfig:
         self.username = config['username']
         self.password = config['password']
         self.watchdog_timeout = config['watchdog_timeout']  
+        self.project_id = config['project_id']  
 
 class DatabaseConfig:
     def __init__(self,config) -> None:

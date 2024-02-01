@@ -32,10 +32,11 @@ class MessageHandler:
         for device_name, value in data.items():
             if device_name[0] == "_":
                 continue
-            device = self.database.get_device(equipment_id=equipment.id,name=device_name)
+            device_full_name = equipment.name +"-" +device_name
+            device = self.database.get_device(equipment_id=equipment.id,name=device_full_name)
             if device is None:
                 self.logger.warning(f"Can't find device for equitment:{equipment.name},name:{device_name},add it")
-                device_id = self.database.add_device(device_name,equipment_id=equipment.id)
+                device_id = self.database.add_device(device_full_name,equipment_id=equipment.id)
             else:
                 device_id = device.id
 
