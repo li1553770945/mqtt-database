@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker,relationship
 import logging
 from contextlib import contextmanager
-
+import settings
 Base = declarative_base()
 
 
@@ -11,6 +11,7 @@ class Equipment(Base):
     __tablename__ = 'tb_equipment'
     id = Column(Integer, primary_key=True)
     name = Column(String(255))
+    project_id = Column(Integer)
     mqtt_id = Column(String(255))
     create_time = Column(DateTime, default=func.now()) 
     devices = relationship("Device", back_populates="equipment")
@@ -23,8 +24,9 @@ class Device(Base):
     id = Column(Integer, primary_key=True)
     create_time = Column(DateTime, default=func.now()) 
     name = Column(String(255))
+    function = Column(String(255))
     equipment_id = Column(Integer, ForeignKey('tb_equipment.id'))
-    project_id = Column(Integer,default=2)
+    project_id = Column(Integer)
     equipment = relationship("Equipment", back_populates="devices")
     device_datas = relationship("DeviceData", back_populates="device")
 
@@ -42,7 +44,8 @@ class DeviceData(Base):
         return f"<DeviceData(id='{self.id})>"
     
 class Database:
-    def __init__(self, uri:str,logger:logging.Logger):
+    def __init__(self,config:settings.Config, uri:str,logger:logging.Logger):
+        self.config = config
         self.logger = logger
         self.engine = create_engine(uri,pool_size=20,max_overflow=40,)
         self.Session = sessionmaker(bind=self.engine,expire_on_commit=False)
@@ -62,9 +65,9 @@ class Database:
         finally:
             session.close()
 
-    def add_equipment(self, name, mqtt_id):
+    def add_equipment(self, name, mqtt_id,project_id=None):
         with self.create_session() as session:
-            new_equipment = Equipment(name=name,mqtt_id=mqtt_id)
+            new_equipment = Equipment(name=name,mqtt_id=mqtt_id,project_id=project_id)
             session.add(new_equipment)
         return new_equipment.id
 
@@ -75,9 +78,10 @@ class Database:
                 return None
         return equipments[0]
     
-    def add_device(self,name,equipment_id):
+    def add_device(self,name,equipment_id,project_id=None):
+        project_id = self.config.mqtt.project_id
         with self.create_session() as session:
-            new_device = Device(name=name,equipment_id=equipment_id)
+            new_device = Device(name=name,equipment_id=equipment_id,project_id=project_id)
             session.add(new_device)
         return new_device.id
     
@@ -88,9 +92,12 @@ class Database:
                 return None
         return devices[0]
     
-    def add_deivce_data(self,device_id,data):
+    def add_deivce_data(self,device_id,data,create_time=None):
         with self.create_session() as session:
-            new_device_data = DeviceData(device_id=device_id,data=data)
+            if create_time:
+                new_device_data = DeviceData(device_id=device_id,data=data,create_time=create_time)
+            else:
+                new_device_data = DeviceData(device_id=device_id,data=data)
             session.add(new_device_data)
         return new_device_data.id
 
